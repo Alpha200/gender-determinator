@@ -1,24 +1,69 @@
 import pkg_resources
 import csv
 import codecs
+from enum import Enum
 
-DEFINITE_ARTICLES = dict(
-    m="der",
-    f="die",
-    n="das"
-)
 
-INDEFINITE_ARTICLES = dict(
-    m="ein",
-    f="eine",
-    n="ein"
-)
+class Case(Enum):
+    NOMINATIVE = 1,
+    GENITIVE = 2,
+    DATIVE = 3,
+    ACCUSATIVE = 4
 
-LOCAL_PREPOSITION_INSIDE = dict(
-    m="im",
-    f="in der",
-    n="im"
-)
+
+def _append(word, noun):
+    if word is None:
+        return noun
+    else:
+        return "{} {}".format(word, noun)
+
+
+cases = {
+    "singular": {
+        Case.NOMINATIVE: dict(
+            m="der",
+            f="die",
+            n="das"
+        ),
+        Case.ACCUSATIVE: dict(
+            m="den",
+            f="die",
+            n="das"
+        ),
+        Case.DATIVE: dict(
+            m="dem",
+            f="der",
+            n="dem"
+        ),
+        Case.GENITIVE: dict(
+            m="des",
+            f="der",
+            n="des"
+        )
+    },
+    "plural": {
+        Case.NOMINATIVE: dict(
+            m="die",
+            f="die",
+            n="die"
+        ),
+        Case.ACCUSATIVE: dict(
+            m="die",
+            f="die",
+            n="die"
+        ),
+        Case.DATIVE: dict(
+            m="den",
+            f="den",
+            n="den"
+        ),
+        Case.GENITIVE: dict(
+            m="die",
+            f="die",
+            n="die"
+        )
+    }
+}
 
 
 class GenderDeterminator:
@@ -37,26 +82,13 @@ class GenderDeterminator:
 
         return None
 
-    def get_definite_article(self, noun):
+    def get(self, noun, case, plural=False, append=True):
         gender = self.get_gender(noun)
 
         if gender is None:
-            return None
+            return noun if append else None
 
-        return DEFINITE_ARTICLES[gender]
+        ps = "plural" if plural else "singular"
+        word = cases[ps][case][gender]
 
-    def get_indefinite_article(self, noun):
-        gender = self.get_gender(noun)
-
-        if gender is None:
-            return None
-
-        return INDEFINITE_ARTICLES[gender]
-
-    def get_local_preposition_for_inside(self, noun):
-        gender = self.get_gender(noun)
-
-        if gender is None:
-            return None
-
-        return LOCAL_PREPOSITION_INSIDE[gender]
+        return _append(word, noun) if append else word

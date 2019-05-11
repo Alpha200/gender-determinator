@@ -1,1 +1,1 @@
-from genderdeterminator.gender_determinator import GenderDeterminator
+from genderdeterminator.gender_determinator import GenderDeterminator, Case
